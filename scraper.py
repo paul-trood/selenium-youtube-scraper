@@ -1,3 +1,6 @@
+# The file was created and runs from Replit
+import os
+import json
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -6,6 +9,7 @@ Time command allows for the web page to completely load, and extract all element
 import time
 
 import pandas as pd
+import smtplib, ssl
 
 # YouTube webpage url for the top trending videos
 youtube_url = "https://www.youtube.com/feed/trending"
@@ -50,6 +54,9 @@ def parse_video(video):
     views = video.find_element(By.XPATH,'.//*[@id="metadata-line"]/span[1]').text
     post_date = video.find_element(By.XPATH,'.//*[@id="metadata-line"]/span[2]').text
 
+    date_scraped = pd.Timestamp("today").strftime('%Y-%m-%d %H:%M:%S')
+
+    
 
 # Return a dictionary of the scraped elements
     return {
@@ -59,29 +66,88 @@ def parse_video(video):
         "channel": channel_name,
         "description": description,
         "views": views,
-        "post_date": post_date
+        "post_date": post_date,
+        "date_scraped":date_scraped
     }
 
+
+
+
+#from email.mime.text import MIMEText
+
+
+# def send_email_gmail(subject, message, destination):
+#     # First assemble the message
+#     msg = MIMEText(message, 'plain')
+#     msg['Subject'] = subject
+
+#     # Login and send the message
+#     port = 465
+#     my_mail = 'webscraperutube@gmail.com'
+#     #my_password = 'udmmvzclqhfjdqqq'
+#     my_password = os.environ['my_password']
+#     context = ssl.create_default_context() 
+#     with smtplib.SMTP_SSL('smtp.gmail.com', port, context=context) as server:
+#         server.login(my_mail, my_password)
+#         server.sendmail(my_mail, destination, msg.as_string())
+
+
+# send_email_gmail('Test subject', 'This is the message', 'webscraperutube@gmail.com')
+
+def send_email(body):
+  try:
+    server_ssl = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+    server_ssl.ehlo()   
+
+    sender_email = "webscraperutube@gmail.com"
+    receiver_email = "webscraperutube@gmail.com"
+    sender_password = os.environ["my_password"]
+    
+    subject = "YouTube Trending Videos"
+    
+    email_text = f"""
+    From: {sender_email}
+    To: {receiver_email}
+    Subject: {subject}
+    
+    {body}
+    """
+
+    server_ssl.login(sender_email, sender_password)
+    server_ssl.sendmail(sender_email, receiver_email, email_text)
+    server_ssl.close()
+
+  except:
+      print("Something went wrong...")
+  
+
 if __name__ == "__main__":
-    print("Creating driver")
-    driver = get_driver()
+  print("Creating driver")
+  driver = get_driver()
 
-    print("Fetching the trending videos")
+  print("Fetching the trending videos")
 
-    videos = get_videos(driver)
+  videos = get_videos(driver)
 
-    print("Get the video divs")
+  print("Get the video divs")
 
-    print(f"Found {len(videos)} videos")
+  print(f"Found {len(videos)} videos")
 
-    print("Parsing the top 10 videos")
+  print("Parsing the top 10 videos")
     # title, url, thumbnail_url, url, channel
-    videos_data = [parse_video(video) for video in videos[:10]]
+  videos_data = [parse_video(video) for video in videos[:10]]
 
-    print(videos_data)
+  print(videos_data)
 
     # Save the dictionary to a pandas dataframe
-    print("Save data to csv using pandas")
-    videos_dataframe = pd.DataFrame(videos_data)
-    print(videos_dataframe)
-    videos_dataframe.to_csv("trending.csv", index=None)
+  print("Save data to csv using pandas")
+  videos_dataframe = pd.DataFrame(videos_data)
+  print(videos_dataframe)
+  videos_dataframe.to_csv("trending.csv", index=None)
+
+  print("Send an email with the results")
+  body = json.dumps(videos_data, indent = 2)
+
+  # Send email with json data of scraped videos
+  send_email(body)
+  print("Finished")
