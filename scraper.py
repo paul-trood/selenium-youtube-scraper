@@ -71,29 +71,6 @@ def parse_video(video):
     }
 
 
-
-
-#from email.mime.text import MIMEText
-
-
-# def send_email_gmail(subject, message, destination):
-#     # First assemble the message
-#     msg = MIMEText(message, 'plain')
-#     msg['Subject'] = subject
-
-#     # Login and send the message
-#     port = 465
-#     my_mail = 'webscraperutube@gmail.com'
-#     #my_password = 'udmmvzclqhfjdqqq'
-#     my_password = os.environ['my_password']
-#     context = ssl.create_default_context() 
-#     with smtplib.SMTP_SSL('smtp.gmail.com', port, context=context) as server:
-#         server.login(my_mail, my_password)
-#         server.sendmail(my_mail, destination, msg.as_string())
-
-
-# send_email_gmail('Test subject', 'This is the message', 'webscraperutube@gmail.com')
-
 def send_email(body):
   try:
     server_ssl = smtplib.SMTP_SSL("smtp.gmail.com", 465)
