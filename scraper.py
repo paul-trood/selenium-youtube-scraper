@@ -9,7 +9,7 @@ Time command allows for the web page to completely load, and extract all element
 import time
 
 import pandas as pd
-import smtplib, ssl
+import smtplib
 
 # YouTube webpage url for the top trending videos
 youtube_url = "https://www.youtube.com/feed/trending"
